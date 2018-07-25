@@ -34,7 +34,7 @@ sig Cliente {
 --Predicados 
 
 --Todo pedido está ligado a um cliente
-pred todoPedidoPerteceAUmCliente{
+pred todoPedidoPertenceAUmCliente{
 	all p:Pedido |  one p.~pedidos
 }
 
