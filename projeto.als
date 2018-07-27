@@ -22,7 +22,7 @@ sig Cliente {
 
 --Lanchonete pode ter zero ou mais clientes
 one sig Lanchonete {
-	clientes : some Cliente
+	clientes : set Cliente
 }
 
 --Qualquer pedido que não seja combo 
@@ -119,23 +119,26 @@ fact {
 
 --Asserts
 
-assert pedidoTemTortaBrinde{
+assert comboUmTemBrigadeiroOuPudim{
+	all p:ComboUm, b:Brigadeiro, pu:Pudim, r: Refrigerante, s: Suco|  (b in p.brinde)  => ((#(p.salgados) >= 2 or #(p.sanduiches) >= 2) and 
+	                                                                                                                                ((r in p.bebidas) or (s in p.bebidas)))
+	                                                                                               or 
+	                                                                                                            (pu in p.brinde)  => ((#(p.salgados) >= 2 or #(p.sanduiches) >= 2) and 
+	                                                                                                                                ((r in p.bebidas) or (s in p.bebidas)))	  
+}
+
+assert comboDoisTemTortaBrinde{
 	all p:ComboDois , t : Torta | some r:Refrigerante | t in p.brinde => ((#(p.salgados) >= 2 and  #(p.sanduiches) >=1)  or  
 	                                                        (#(p.sanduiches) >= 2 and #(p.salgados) >= 1)  and r in p.bebidas) 
 }
 
-assert pedidoTemBrigadeiroBrinde{
-	all p:Pedido , b:Brigadeiro, s: Suco, r:Refrigerante | b in p.brinde => (#p.salgados >= 2 or #p.sanduiches >= 2)
-	                                                                          and (s in p.bebidas or r in p.bebidas)
+assert ComboDoisNaoTemBrigadeiroBrinde{
+	all p : ComboDois, b : Brigadeiro | ! b in getBrindeComboDois[p]
 }
 
-assert pedidoTemPudimBrinde{
-	all p:Pedido , pu:Pudim, s: Suco, r:Refrigerante | pu in p.brinde => (#p.salgados >= 2 or #p.sanduiches >= 2)
-	                                                                      and (s in p.bebidas or r in p.bebidas)
-}
+check  comboUmTemBrigadeiroOuPudim for 10
+check ComboDoisNaoTemBrigadeiroBrinde for 10
+check comboDoisTemTortaBrinde for 10
 
-check pedidoTemTortaBrinde for 6
-check pedidoTemBrigadeiroBrinde for 6
-check pedidoTemPudimBrinde for 6
 
 run show for 10 but exactly 4 Cliente, exactly 6 Pedido, exactly 2 ComboDois, exactly 2 ComboUm,  exactly 2 SemCombo
